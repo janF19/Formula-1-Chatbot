@@ -21,11 +21,10 @@ body {
 main {
     width: 80vh;
     height: 80vh;
-    background-color: linear-gradient(to bottom, #f8f8f8, #cfcfcf);
+    background: linear-gradient(to bottom, #f8f8f8, #cfcfcf);
     border-radius: 15px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     align-items: center;
     padding: 20px;
     text-align: center;
@@ -34,14 +33,29 @@ main {
 
 section {
     width: 100%;
+    flex: 1;
 }
 
 section.populated {
-    height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    overflow: scroll;
+    overflow-y: auto !important;
+    height: calc(100% - 100px);
+    margin: 20px 0;
+    padding: 0 10px;
+    
+    scrollbar-width: thin;
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+    &::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 3px;
+    }
 }
 
 .starter-text {
@@ -49,13 +63,12 @@ section.populated {
 }
 
 form {
-    height: 50px;
-    width: 100%;
+    width: calc(100% - 40px);
+    min-height: 50px;
+    margin-top: auto;
     display: flex;
     border-top: #828282 solid 2px;
     padding-top: 20px;
-    border-radius: 0 0 10px 10px;
-    overflow: hidden;
 }
 
 input.question-box {
@@ -103,13 +116,15 @@ input:focus {
 
 
 .bubble{
+    flex-shrink: 0;
     margin: 8px;
+    width: auto;
+    max-width: 80%;
     padding: 8px;
     font-size: 15px;
     border: none;
     color: #383838;
     box-shadow: #959da533 0 8px 24px;
-    width: 80%;
     text-align: left;
 }
 
