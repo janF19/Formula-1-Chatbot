@@ -43,13 +43,14 @@ async function getEmbeddings(text: string): Promise<number[]> {
 const f1Data = [
     'https://en.wikipedia.org/wiki/Formula_One',
     'https://en.wikipedia.org/wiki/2023_Formula_One_World_Championship',
+    'https://www.formula1.com/',
     // ... rest of your URLs ...
 ]
 
 const createCollection = async (similarityMetric: SimilarityMetric = "dot_product") => {
     const res = await db.createCollection(ASTRA_DB_COLLECTION, {
         vector: {
-            dimension: 1024, // Changed to 1024 for mxbai-embed-large
+            dimension: 1024, 
             metric: similarityMetric
         }
     })

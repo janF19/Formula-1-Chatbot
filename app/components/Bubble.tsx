@@ -1,12 +1,19 @@
 
 
 
-const Bubble = ({message}) => {
-    const { content, role} = message
+
+
+
+
+
+const Bubble = ({ message }: { message: { content: string; role: 'user' | 'assistant' } }) => {
     return (
-        <div className={`${role} bubble`}>{content}</div>
-    )
-}
+        <div className={`bubble ${message.role}`}>
+            <div className="bubble-content">
+                {message.content}
+            </div>
+        </div>
+    );
+};
 
-
-export default Bubble
+export default Bubble;

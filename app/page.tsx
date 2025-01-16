@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import f1GPTLogo from "./assets/f1.png"
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Bubble from "./components/Bubble"
 import LoadingBubble from "./components/LoadingBubble"
 import PromptSuggestionsRow from "./components/PromptSuggestionsRow"
@@ -17,85 +17,56 @@ const Home = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<Error | null>(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!input.trim() || isLoading) return;
 
-        const userMessage: Message = {
+        // Add user message
+        const userMessage = {
             id: crypto.randomUUID(),
             content: input.trim(),
-            role: 'user'
+            role: 'user' as const
         };
-
         setMessages(prev => [...prev, userMessage]);
         setInput('');
         setIsLoading(true);
-        setError(null);
 
         try {
             const response = await fetch('/api/chat', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    messages: [...messages, userMessage]
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messages: [...messages, userMessage] })
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            if (!response.ok) throw new Error('Failed to get response');
 
-            const reader = response.body?.getReader();
-            const decoder = new TextDecoder();
-
-            if (!reader) {
-                throw new Error('No reader available');
-            }
-
-            while (true) {
-                const { value, done } = await reader.read();
-                if (done) break;
-
-                const text = decoder.decode(value);
-                const lines = text.split('\n');
-
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        const data = line.slice(6);
-                        if (data === '[DONE]') continue;
-
-                        try {
-                            const message = JSON.parse(data);
-                            setMessages(prev => [...prev, message]);
-                        } catch (e) {
-                            console.warn('Error parsing message:', e);
-                        }
-                    }
-                }
-            }
-        } catch (e) {
-            setError(e as Error);
-            console.error('Chat error:', e);
+            const assistantMessage = await response.json();
+            setMessages(prev => [...prev, assistantMessage]);
+        } catch (error) {
+            console.error('Chat error:', error);
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handlePrompt = (promptText: string) => {
-        setInput(promptText);
+    // Add auto-scroll effect
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
-    const noMessages = messages.length === 0;
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]); // Scroll when messages change
 
     return (
         <main>
             <Image src={f1GPTLogo} alt="F1 GPT Logo" width={100} height={100} />
-            <section className={noMessages ? "" : "populated"}>
-                {noMessages ? (
+            <section 
+                className={`chat-container ${messages.length === 0 ? "" : "populated"}`}
+            >
+                {messages.length === 0 ? (
                     <>
                         <p className="starter-text">
                             The ultimate place for Formula One super fans!
@@ -104,34 +75,30 @@ const Home = () => {
                             We hope you enjoy it!
                         </p>
                         <br />
-                        <PromptSuggestionsRow onPromptClick={handlePrompt}/>
+                        <PromptSuggestionsRow onPromptClick={setInput}/>
                     </>
                 ) : (
                     <>
-                        {messages.map((message, index) => (
-                            <Bubble key={`message-${index}`} message={message}/>
+                        {messages.map(message => (
+                            <Bubble key={message.id} message={message} />
                         ))}
-                        {isLoading && <LoadingBubble/>}
+                        {isLoading && <LoadingBubble />}
+                        <div ref={messagesEndRef} />
                     </>
                 )}
             </section>
 
-            {error && (
-                <div className="error-message" style={{ color: 'red', margin: '10px 0' }}>
-                    Error: {error.message}
-                </div>
-            )}
-
             <form onSubmit={handleSubmit}>
                 <input
                     className="question-box"
-                    onChange={(e) => setInput(e.target.value)}
                     value={input}
+                    onChange={(e) => setInput(e.target.value)}
                     placeholder="Ask me anything about F1!"
                     disabled={isLoading}
                 />
                 <input
                     type="submit"
+                    value="Send"
                     disabled={isLoading || !input.trim()}
                 />
             </form>
