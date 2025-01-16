@@ -8,7 +8,7 @@ A Formula 1 chatbot that uses Retrieval-Augmented Generation (RAG) technique to 
 
 This is a [Next.js](https://nextjs.org) project that implements a chatbot specifically focused on Formula 1 topics. It uses RAG (Retrieval-Augmented Generation) to improve the accuracy of LLM responses by incorporating the latest F1 information.
 
-##Credits
+## Credits
 This project was inspired by @aniakubow's tutorial on building a RAG-based chatbot using OpenAI.
 
 ### What Makes This Special?
